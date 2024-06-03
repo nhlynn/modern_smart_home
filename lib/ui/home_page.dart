@@ -1,30 +1,14 @@
 import 'package:flutter/material.dart';
-import '../model/device_vo.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../provider/smart_device_notifier.dart';
 import '../widget/smart_device_widget.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  List mySmartDevices = [
-    DeviceVo('Smart Light', 'images/light.png', false),
-    DeviceVo('Smart AC', 'images/ac.png', false),
-    DeviceVo('Smart TV', 'images/tv.png', false),
-    DeviceVo('Smart Fan', 'images/fan.png', false),
-  ];
-
-  void powerSwitchChange(bool powerOn, int index) {
-    setState(() {
-      mySmartDevices[index].powerOn = powerOn;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    var items = ref.watch(smartDeviceProvider);
     return Scaffold(
       backgroundColor: Colors.grey.shade300,
       body: SafeArea(
@@ -102,7 +86,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Expanded(
               child: GridView.builder(
-                itemCount: mySmartDevices.length,
+                itemCount: items.length,
                 physics: const NeverScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -110,10 +94,13 @@ class _HomePageState extends State<HomePage> {
                   childAspectRatio: 1 / 1.3,
                 ),
                 itemBuilder: (context, index) {
-                  var sDevice = mySmartDevices[index];
+                  var sDevice = items[index];
                   return SmartDeviceWidget(
                     device: sDevice,
-                    onChange: (value) => powerSwitchChange(value, index),
+                    onChange: (value) {
+                      ref.read(smartDeviceProvider.notifier)
+                          .powerSwitchChange(value, index);
+                    },
                   );
                 },
               ),
