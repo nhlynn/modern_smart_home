@@ -1,30 +1,15 @@
 import 'package:flutter/material.dart';
-import '../model/device_vo.dart';
+import 'package:get/get.dart';
+import '../controller/smart_device_controller.dart';
 import '../widget/smart_device_widget.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  List mySmartDevices = [
-    DeviceVo('Smart Light', 'images/light.png', false),
-    DeviceVo('Smart AC', 'images/ac.png', false),
-    DeviceVo('Smart TV', 'images/tv.png', false),
-    DeviceVo('Smart Fan', 'images/fan.png', false),
-  ];
-
-  void powerSwitchChange(bool powerOn, int index) {
-    setState(() {
-      mySmartDevices[index].powerOn = powerOn;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final appController = Get.put(SmartDeviceController());
+
     return Scaffold(
       backgroundColor: Colors.grey.shade300,
       body: SafeArea(
@@ -100,22 +85,25 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            Expanded(
-              child: GridView.builder(
-                itemCount: mySmartDevices.length,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 1 / 1.3,
+            Obx(
+              () => Expanded(
+                child: GridView.builder(
+                  itemCount: appController.mySmartDevices.length,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1 / 1.3,
+                  ),
+                  itemBuilder: (context, index) {
+                    var sDevice = appController.mySmartDevices[index];
+                    return SmartDeviceWidget(
+                      device: sDevice,
+                      onChange: (value) =>
+                          appController.powerSwitchChange(value, index),
+                    );
+                  },
                 ),
-                itemBuilder: (context, index) {
-                  var sDevice = mySmartDevices[index];
-                  return SmartDeviceWidget(
-                    device: sDevice,
-                    onChange: (value) => powerSwitchChange(value, index),
-                  );
-                },
               ),
             ),
           ],
